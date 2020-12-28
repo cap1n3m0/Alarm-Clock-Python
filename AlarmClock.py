@@ -5,7 +5,7 @@ import time
 import months as m
 import times as t
 import sys
-from playsound import playsound
+import pygame
 
 class Current: 
     hour = ""
@@ -81,7 +81,9 @@ def update(*args):
         if target_hours < 12: 
             target_hours = int(def_hours.get()) + 12
     elif target_hours == 12: 
-        target_hours = 0    
+        target_hours = 0
+    else: 
+        target_hours = int(def_hours.get())
 
 
 # Show alarm clock 
@@ -124,10 +126,6 @@ def drop_place():
     drop_minutes.place(relx = 0.4, rely = 0.6, relwidth = 0.1)
     drop_seconds.place(relx = 0.5, rely = 0.6, relwidth = 0.1)
     drop_time_of_day.place(relx = 0.6, rely = 0.6, relwidth = 0.1)
-    drop_seconds.config(bg="#2B2B2B", fg = "white")
-    drop_minutes.config(bg="#2B2B2B", fg = "white")
-    drop_hours.config(bg="#2B2B2B", fg = "white")
-    drop_time_of_day.config(bg="#2B2B2B", fg = "white")
 
 
 def show_stopwatch():
@@ -168,6 +166,7 @@ def change_alarm_time():
     global stopwatch_on
     if target_hours > 23: 
         target_hours = 12
+    pygame.mixer.init()
     while not DATE(DATE.now().year, DATE.now().month, DATE.now().day, target_hours, int(def_minutes.get()), int(def_seconds.get())) == DATE(DATE.now().year, DATE.now().month, DATE.now().day, int(c.hour), int(c.minute), int(c.second)):
         future_time = DATE(DATE.now().year, DATE.now().month, DATE.now().day, target_hours, int(def_minutes.get()), int(def_seconds.get()))
         current_time = DATE(DATE.now().year, DATE.now().month, DATE.now().day, int(c.hour), int(c.minute), int(c.second))
@@ -184,7 +183,9 @@ def change_alarm_time():
             l_alarm_time.config(text =  "Time Up!")
     if DATE(DATE.now().year, DATE.now().month, DATE.now().day, target_hours, int(def_minutes.get()), int(def_seconds.get())) - DATE(DATE.now().year, DATE.now().month, DATE.now().day, int(c.hour), int(c.minute), int(c.second)) == datetime.timedelta(seconds = 0): 
         time_up = True
-        playsound('alarm.mp3')
+        print("Time Up!")
+        pygame.mixer.music.load("Alarm.mp3")
+        pygame.mixer.music.play(loops = 0)
 
 
 def change_stopwatch_time(val): 
@@ -216,6 +217,7 @@ def toggle_alarm_state():
         time_up = False
         _thread.start_new_thread(change_alarm_time, ())
     if not alarm_on and not stopwatch_on: 
+        pygame.mixer.music.stop()
         alarm_start_stop.config(text =  "Start Alarm")
         t_set_alarm_for.config(text = "Set alarm for")
         drop_place()
@@ -260,10 +262,10 @@ def resume_stopwatch(elapsed_time, this):
     _thread.start_new_thread(change_stopwatch_time, (elapsed_time, ))
 
 
-stopwatch_start_stop = Button(alarm, highlightbackground = "#27b843", width = 30, height = 4, fg = "white", font = ("Courier", 16), text = str_stopwatch_state, command = toggle_stopwatch_state)
-alarm_start_stop = Button(alarm, highlightbackground = "#27b843", width = 20, height = 4, fg = "white", font = ("Courier", 16), text = str_alarm_state, command = toggle_alarm_state)
+stopwatch_start_stop = Button(alarm, bg = "#27b843", width = 30, height = 4, font = ("Courier", 16), text = str_stopwatch_state, command = toggle_stopwatch_state)
+alarm_start_stop = Button(alarm, bg = "#27b843", width = 20, height = 4, font = ("Courier", 16), text = str_alarm_state, command = toggle_alarm_state)
 stopwatch_resume = Button (
-        alarm, highlightbackground = "#de4554", width = 30, height = 4, fg = "white", text = "Resume stopwatch", font = ("Courier", 16), 
+        alarm, bg = "#de4554", width = 30, height = 4, text = "Resume stopwatch", font = ("Courier", 16), 
         command = lambda: resume_stopwatch(elapsed_time, stopwatch_resume)
 )
 
